@@ -5,16 +5,10 @@
 
 #include <SDL2/SDL.h>
 
-#include "opengl/buffermanager.h"
 #include "opengl/compiler.h"
-#include "opengl/ebomanager.h"
-#include "opengl/framebuffermanager.h"
 #include "opengl/programmanager.h"
-#include "opengl/semantics.h"
 #include "opengl/shadermanager.h"
 #include "opengl/texturemanager.h"
-#include "opengl/vaomanager.h"
-#include "opengl/vertex.h"
 
 #include "vector.h"
 
@@ -33,15 +27,11 @@ private:
     int fb_width, fb_height;
     Color3f *fb;
 
-    /// Buffer management
-    BufferManager bufferManager;
-    FramebufferManager framebufferManager;
+    GLuint vao;
     TextureManager textureManager;
     ShaderManager shaderManager;
     ProgramManager programManager;
-    VAOManager<glf::vertex_v3fv2f> vaoManager;
-    EBOManager eboManager;
-    bool opengl_error = false;
+    bool opengl_error;
 };
 
 #endif

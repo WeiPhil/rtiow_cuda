@@ -39,14 +39,14 @@ include_directories(${SDL2_INCLUDE_DIRS})
 # ====== SDL2 ====== 
 
   
-# Include path for the project 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/opengl)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/stb)
 
 # Adding cpp files per directory
 set(SRC_DIR src)
 aux_source_directory(${SRC_DIR} SRC_FILES)
 aux_source_directory(${SRC_DIR}/opengl SRC_FILES_OPENGL)
+
+# Include path for the project 
+include_directories(${SRC_DIR})
 
 add_executable(cudart ${GL3W_SRC} ${SRC_FILES} ${SRC_FILES_OPENGL})
  

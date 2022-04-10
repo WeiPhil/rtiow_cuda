@@ -12,33 +12,37 @@
 
 #include "compiler.h"
 
-class ProgramManager
-{
-
+class ProgramManager {
 private:
-  std::map<std::string, GLuint> m_programs_map;
-  int m_max;
+    std::map<std::string, GLuint> m_programs_map;
+    int m_max;
 
 public:
-  ProgramManager() : m_max(0){};
-  ~ProgramManager(){};
+    ProgramManager() : m_max(0){};
+    ~ProgramManager(){};
 
-  int size() const { return m_max; }
+    int size() const
+    {
+        return m_max;
+    }
 
-  void addProgram(std::string programName)
-  {
-    m_programs_map[programName] = glCreateProgram();
-    ++m_max;
-  }
+    void addProgram(std::string programName)
+    {
+        m_programs_map[programName] = glCreateProgram();
+        ++m_max;
+    }
 
-  GLuint operator()(const std::string programName) { return programID(programName); }
+    GLuint operator()(const std::string programName)
+    {
+        return programID(programName);
+    }
 
-  GLuint programID(const std::string programName)
-  {
-    assert(m_programs_map.find(programName) != m_programs_map.end());
+    GLuint programID(const std::string programName)
+    {
+        assert(m_programs_map.find(programName) != m_programs_map.end());
 
-    return m_programs_map[programName];
-  }
+        return m_programs_map[programName];
+    }
 };
 
 #endif

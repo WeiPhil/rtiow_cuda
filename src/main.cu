@@ -8,7 +8,7 @@
 
 #include "camera.h"
 #include "hittable.h"
-#include "opengl_display.h"
+#include "opengl/gl_display.h"
 #include "ray.h"
 
 #include "sphere.h"
@@ -111,8 +111,8 @@ int main()
     int im_width = 1920;
     int im_height = 1080;
     float aspect_ratio = float(im_width) / im_height;
-    const int thread_num_x = 32;
-    const int thread_num_y = 32;
+    const int thread_num_x = 8;
+    const int thread_num_y = 8;
 
     Camera *camera;
     checkCuda(cudaMallocManaged(&camera, sizeof(Camera)));

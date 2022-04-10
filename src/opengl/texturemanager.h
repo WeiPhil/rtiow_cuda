@@ -9,9 +9,7 @@
 #include <map>
 #include <vector>
 
-class TextureManager
-{
-
+class TextureManager {
 private:
     int m_max;
     std::map<std::string, int> m_textures_map;
@@ -23,7 +21,10 @@ public:
 
     std::vector<GLuint> textures;
 
-    int size() const { return m_max; }
+    int size() const
+    {
+        return m_max;
+    }
 
     void addTexture(std::string textureName)
     {
@@ -40,7 +41,10 @@ public:
         textures.resize(m_max);
     }
 
-    GLuint operator()(const std::string textureName) { return textureID(textureName); }
+    GLuint operator()(const std::string textureName)
+    {
+        return textureID(textureName);
+    }
 
     GLuint textureID(const std::string textureName)
     {
