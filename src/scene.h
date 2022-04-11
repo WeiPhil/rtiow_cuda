@@ -1,22 +1,20 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
+#include "allocator.h"
 #include "hittable.h"
 
 #include <memory>
 #include <vector>
 
-class Scene : public Hittable {
+class Scene {
 public:
     __device__ Scene() {}
     __device__ Scene(Hittable **objects, int num_objects)
         : objects(objects), num_objects(num_objects)
     {
     }
-    __device__ virtual bool hit(const Ray &ray,
-                                float t_min,
-                                float t_max,
-                                HitRecord &rec) const override;
+    __device__ bool hit(const Ray &ray, float t_min, float t_max, HitRecord &rec) const;
 
 public:
     Hittable **objects;

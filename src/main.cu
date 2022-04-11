@@ -16,26 +16,32 @@
 #include "scene.h"
 #include "vector.h"
 
+#include "allocator.h"
+
 #define DEBUG
 
-// Convenience function for checking CUDA runtime API results
-// can be wrapped around any runtime API call. No-op in release builds.
-inline cudaError_t checkCuda(cudaError_t result)
+// limited version of checkCudaErrors from helper_cuda.h in CUDA examples
+#define checkCuda(val) check_cuda((val), #val, __FILE__, __LINE__)
+
+void check_cuda(cudaError_t result,
+                char const *const func,
+                const char *const file,
+                int const line)
 {
-#if defined(DEBUG) || defined(_DEBUG)
-    if (result != cudaSuccess) {
-        fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(result));
-        assert(result == cudaSuccess);
+    if (result) {
+        std::cerr << "CUDA Runtime error: " << cudaGetErrorString(result) << " at " << file
+                  << ":" << line << " '" << func << "' \n";
+        // Make sure we call CUDA Device Reset before exiting
+        cudaDeviceReset();
+        exit(99);
     }
-#endif
-    return result;
 }
 
-__device__ Color3f sample(const Ray &ray, Scene **scene)
+__device__ Color3f sample(const Ray &ray, Scene *scene)
 {
     // If we hit the world shade
     HitRecord rec;
-    if ((*scene)->hit(ray, 0.f, FLT_MAX, rec)) {
+    if (scene->hit(ray, 0.f, FLT_MAX, rec)) {
         Vector3f normal = normalize(ray.at(rec.t) - Vector3f(0.f, 0.f, -1.f));
         return 0.5f * Color3f(normal.x + 1.f, normal.y + 1.f, normal.z + 1.f);
     } else {
@@ -46,7 +52,8 @@ __device__ Color3f sample(const Ray &ray, Scene **scene)
     }
 }
 
-__global__ void render(Color3f *fb, int im_width, int im_height, Camera *camera, Scene **scene)
+__global__ void render(
+    Color3f *fb, int im_width, int im_height, const Camera &camera, Scene **scene)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     int j = blockDim.y * blockIdx.y + threadIdx.y;
@@ -56,13 +63,13 @@ __global__ void render(Color3f *fb, int im_width, int im_height, Camera *camera,
 
     float u = float(i) / (im_width - 1);
     float v = float(j) / (im_height - 1);
-    Ray ray(camera->origin,
-            camera->lower_left_corner + u * camera->horizontal + v * camera->vertical -
-                camera->origin);
+    Ray ray(camera.origin,
+            camera.lower_left_corner + u * camera.horizontal + v * camera.vertical -
+                camera.origin);
 
     int index = j * im_width + i;
 
-    fb[index] = sample(ray, scene);
+    fb[index] = sample(ray, *scene);
 }
 
 __global__ void create_scene(Hittable **d_objects, Scene **d_scene)
@@ -114,9 +121,7 @@ int main()
     const int thread_num_x = 8;
     const int thread_num_y = 8;
 
-    Camera *camera;
-    checkCuda(cudaMallocManaged(&camera, sizeof(Camera)));
-    *camera = Camera(aspect_ratio);
+    auto camera = cudart::make_shared<Camera>(aspect_ratio);
 
     size_t fb_size = im_width * im_height * sizeof(Color3f);
     // framebuffer
@@ -218,7 +223,7 @@ int main()
             }
         }
 
-        render<<<blocks, threads>>>(fb, im_width, im_height, camera, d_scene);
+        render<<<blocks, threads>>>(fb, im_width, im_height, *camera, d_scene);
         checkCuda(cudaGetLastError());
 
         // Synchronise device/host and display
@@ -233,7 +238,6 @@ int main()
 
     checkCuda(cudaDeviceSynchronize());
     checkCuda(cudaFree(fb));
-    checkCuda(cudaFree(camera));
     free_scene<<<1, 1>>>(d_scene);
     checkCuda(cudaFree(d_scene));
     checkCuda(cudaFree(d_objects));
