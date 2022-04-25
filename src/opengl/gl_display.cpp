@@ -1,8 +1,13 @@
-#include "gl_display.h"
+#include <GL/glew.h>
 
 #include <GL/gl.h>
-#include <GL/glew.h>
+
 #include <SDL2/SDL.h>
+
+#include "common/macros.h"
+#include "opengl/gl_display.h"
+
+CUDART_NAMESPACE_BEGIN
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -113,3 +118,5 @@ void OpenGLDisplay::display()
     // glDrawElementsInstancedBaseVertex(
     //     GL_TRIANGLES, eboManager.getElementCount(), GL_UNSIGNED_INT, 0, 1, 0);
 }
+
+CUDART_NAMESPACE_END

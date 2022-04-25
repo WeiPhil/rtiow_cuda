@@ -9,8 +9,9 @@
 // www.g-truc.net
 //**********************************
 
-#include "compiler.h"
+#include "opengl/compiler.h"
 
+#include "common/macros.h"
 #include <glm/gtc/random.hpp>
 
 #include <cstdarg>
@@ -19,6 +20,8 @@
 #include <string>
 
 #include <iostream>
+
+CUDART_NAMESPACE_BEGIN
 
 std::string getDataDirectory()
 {
@@ -386,3 +389,5 @@ bool save_binary(std::string const &Filename,
     }
     return false;
 }
+
+CUDART_NAMESPACE_END

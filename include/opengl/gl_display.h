@@ -3,14 +3,17 @@
 #ifndef DISPLAY_FRAMEBUFFER_H
 #define DISPLAY_FRAMEBUFFER_H
 
-#include <SDL2/SDL.h>
-
+#include "common/macros.h"
 #include "opengl/compiler.h"
 #include "opengl/programmanager.h"
 #include "opengl/shadermanager.h"
 #include "opengl/texturemanager.h"
 
-#include "vector.h"
+#include "base/vector.h"
+
+#include <SDL2/SDL.h>
+
+CUDART_NAMESPACE_BEGIN
 
 class OpenGLDisplay {
 public:
@@ -33,5 +36,7 @@ private:
     ProgramManager programManager;
     bool opengl_error;
 };
+
+CUDART_NAMESPACE_END
 
 #endif

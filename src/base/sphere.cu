@@ -1,8 +1,12 @@
+
 #include <glm/gtx/norm.hpp>
 
-#include "sphere.h"
+#include "base/sphere.h"
+#include "common/macros.h"
 
-__device__ bool Sphere::hit(const Ray &ray, float t_min, float t_max, HitRecord &rec) const
+CUDART_NAMESPACE_BEGIN
+
+CUDART_FN bool Sphere::hit(const Ray &ray, float t_min, float t_max, HitRecord &rec) const
 {
     Vector3f oc = ray.origin - center;
     float a = length2(ray.dir);
@@ -32,3 +36,5 @@ __device__ bool Sphere::hit(const Ray &ray, float t_min, float t_max, HitRecord 
 
     return true;
 }
+
+CUDART_NAMESPACE_END

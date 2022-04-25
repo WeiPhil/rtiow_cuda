@@ -3,7 +3,10 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "common/macros.h"
 #include "vector.h"
+
+CUDART_NAMESPACE_BEGIN
 
 class Camera {
 public:
@@ -49,5 +52,7 @@ private:
     float viewport_height;
     float viewport_width;
 };
+
+CUDART_NAMESPACE_END
 
 #endif

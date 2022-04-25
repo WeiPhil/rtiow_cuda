@@ -1,26 +1,29 @@
 #pragma once
 
-#ifndef ALLOCATOR_H
-#define ALLOCATOR_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
-namespace cudart {
+#include <memory>
+#include "common/macros.h"
 
-// limited version of checkCudaErrors from helper_cuda.h in CUDA examples
-#define checkCuda(val) check_cuda_allocator((val), #val, __FILE__, __LINE__)
+CUDART_NAMESPACE_BEGIN
 
-void check_cuda_allocator(cudaError_t result,
-                          char const *const func,
-                          const char *const file,
-                          int const line)
-{
-    if (result) {
-        std::cerr << "CUDA Runtime error: " << cudaGetErrorString(result) << " at " << file
-                  << ":" << line << " '" << func << "' \n";
-        // Make sure we call CUDA Device Reset before exiting
-        cudaDeviceReset();
-        exit(99);
+class Managed {
+public:
+    void *operator new(size_t len)
+    {
+        void *ptr;
+        cudaMallocManaged(&ptr, len);
+        cudaDeviceSynchronize();
+        return ptr;
     }
-}
+
+    void operator delete(void *ptr)
+    {
+        cudaDeviceSynchronize();
+        cudaFree(ptr);
+    }
+};
 
 template <typename T>
 class Allocator {
@@ -79,6 +82,6 @@ ref<T> make_shared(Args &&...args)
     return std::allocate_shared<T, Allocator<T>>({}, args...);
 }
 
-}
+CUDART_NAMESPACE_END
 
 #endif

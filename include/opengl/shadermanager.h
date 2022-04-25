@@ -10,7 +10,10 @@
 #include <vector>
 #include <assert.h>
 
-#include "compiler.h"
+#include "common/macros.h"
+#include "opengl/compiler.h"
+
+CUDART_NAMESPACE_BEGIN
 
 class ShaderManager {
 private:
@@ -48,5 +51,7 @@ public:
         return m_path_map[shaderName].c_str();
     }
 };
+
+CUDART_NAMESPACE_END
 
 #endif

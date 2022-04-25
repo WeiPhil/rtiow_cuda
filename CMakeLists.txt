@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   set(CMAKE_CUDA_ARCHITECTURES 86)
@@ -42,13 +43,15 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 # Adding cpp files per directory
 set(SRC_DIR src)
+set(INCLUDE_DIR include)
 aux_source_directory(${SRC_DIR} SRC_FILES)
+aux_source_directory(${SRC_DIR}/base SRC_FILES_BASE)
 aux_source_directory(${SRC_DIR}/opengl SRC_FILES_OPENGL)
 
 # Include path for the project 
-include_directories(${SRC_DIR})
+include_directories(${INCLUDE_DIR})
 
-add_executable(cudart ${GL3W_SRC} ${SRC_FILES} ${SRC_FILES_OPENGL})
+add_executable(cudart ${GL3W_SRC} ${SRC_FILES} ${SRC_FILES_BASE} ${SRC_FILES_OPENGL})
  
 set_property(TARGET cudart 
              PROPERTY CUDA_SEPARABLE_COMPILATION ON)

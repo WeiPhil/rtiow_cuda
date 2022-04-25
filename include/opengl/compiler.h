@@ -11,6 +11,9 @@
 #include <string>
 #include <vector>
 
+#include "common/macros.h"
+CUDART_NAMESPACE_BEGIN
+
 std::string format(const char *Message, ...);
 
 bool checkError(const char *Title);
@@ -88,5 +91,7 @@ bool save_binary(std::string const &Filename,
                  GLenum const &Format,
                  std::vector<glm::uint8> const &Data,
                  GLint const &Size);
+
+CUDART_NAMESPACE_END
 
 #endif

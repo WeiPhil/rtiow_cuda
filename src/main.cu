@@ -6,38 +6,22 @@
 #include <SDL2/SDL.h>
 #include <glm/gtx/norm.hpp>
 
-#include "camera.h"
-#include "hittable.h"
 #include "opengl/gl_display.h"
-#include "ray.h"
 
-#include "sphere.h"
+#include "common/allocation.h"
+#include "common/macros.h"
+#include "common/variant.h"
 
-#include "scene.h"
-#include "vector.h"
+#include "base/camera.h"
+#include "base/hittable.h"
+#include "base/ray.h"
+#include "base/scene.h"
+#include "base/sphere.h"
+#include "base/vector.h"
 
-#include "allocator.h"
+using namespace cudart;
 
-#define DEBUG
-
-// limited version of checkCudaErrors from helper_cuda.h in CUDA examples
-#define checkCuda(val) check_cuda((val), #val, __FILE__, __LINE__)
-
-void check_cuda(cudaError_t result,
-                char const *const func,
-                const char *const file,
-                int const line)
-{
-    if (result) {
-        std::cerr << "CUDA Runtime error: " << cudaGetErrorString(result) << " at " << file
-                  << ":" << line << " '" << func << "' \n";
-        // Make sure we call CUDA Device Reset before exiting
-        cudaDeviceReset();
-        exit(99);
-    }
-}
-
-__device__ Color3f sample(const Ray &ray, Scene *scene)
+CUDART_GPU_FN Color3f sample(const Ray &ray, Scene *scene)
 {
     // If we hit the world shade
     HitRecord rec;
@@ -52,8 +36,8 @@ __device__ Color3f sample(const Ray &ray, Scene *scene)
     }
 }
 
-__global__ void render(
-    Color3f *fb, int im_width, int im_height, const Camera &camera, Scene **scene)
+CUDART_KERNEL void render(
+    Color3f *fb, int im_width, int im_height, const Camera &camera, Scene *scene)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     int j = blockDim.y * blockIdx.y + threadIdx.y;
@@ -69,24 +53,24 @@ __global__ void render(
 
     int index = j * im_width + i;
 
-    fb[index] = sample(ray, *scene);
+    fb[index] = sample(ray, scene);
 }
 
-__global__ void create_scene(Hittable **d_objects, Scene **d_scene)
+CUDART_KERNEL void create_scene(Hittable **d_objects, Scene *d_scene)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         d_objects[0] = new Sphere(Vector3f(0.f, 0.f, -1.f), 0.5f);
         d_objects[1] = new Sphere(Vector3f(0.f, -100.5f, -1.f), 100.f);
-        *d_scene = new Scene(d_objects, 2);
+        *d_scene = Scene(d_objects, 2);
     }
 }
 
-__global__ void free_scene(Scene **d_scene)
+CUDART_KERNEL void free_scene(Scene *d_scene)
 {
-    for (size_t i = 0; i < (*d_scene)->num_objects; i++) {
-        delete (*d_scene)->objects[i];
+    for (size_t i = 0; i < d_scene->num_objects; i++) {
+        delete d_scene->objects[i];
     }
-    delete (*d_scene);
+    delete d_scene;
 }
 
 void save_image(float *fb, int im_width, int im_height)
@@ -115,6 +99,20 @@ void save_image(float *fb, int im_width, int im_height)
 
 int main()
 {
+    static_assert(index_of_impl<int, int, double>::value == 0, "!");
+    static_assert(index_of_impl<double, int, double>::value == 1, "!");
+
+    static_assert(index_of<int, int, double> == 0, "!");
+    static_assert(index_of<double, int, double> == 1, "!");
+
+    static_assert(type_at_impl<1, int, float>::type(1.f) == 1.f, "!");
+    static_assert(type_at_impl<0, int, double>::type(1) == int(1), "!");
+
+    Mat1 t1;
+    Mat2 t2;
+
+    // Variant<Mat1, Mat2> var = Variant<Mat1, Mat2>(t1);
+
     int im_width = 1920;
     int im_height = 1080;
     float aspect_ratio = float(im_width) / im_height;
@@ -129,9 +127,9 @@ int main()
     checkCuda(cudaMallocManaged(&fb, fb_size));
 
     // Create scene on device
-    Scene **d_scene;
+    Scene *d_scene;
     Hittable **d_objects;
-    checkCuda(cudaMalloc(&d_scene, sizeof(Scene *)));
+    checkCuda(cudaMalloc(&d_scene, sizeof(Scene)));
     checkCuda(cudaMalloc(&d_objects, 2 * sizeof(Hittable *)));
     create_scene<<<1, 1>>>(d_objects, d_scene);
 

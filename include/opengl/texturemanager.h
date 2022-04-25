@@ -9,6 +9,10 @@
 #include <map>
 #include <vector>
 
+#include "common/macros.h"
+
+CUDART_NAMESPACE_BEGIN
+
 class TextureManager {
 private:
     int m_max;
@@ -60,5 +64,7 @@ public:
         return m_path_map[textureName].c_str();
     }
 };
+
+CUDART_NAMESPACE_END
 
 #endif

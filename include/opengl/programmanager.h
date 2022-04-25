@@ -10,7 +10,10 @@
 #include <vector>
 #include <assert.h>
 
-#include "compiler.h"
+#include "common/macros.h"
+#include "opengl/compiler.h"
+
+CUDART_NAMESPACE_BEGIN
 
 class ProgramManager {
 private:
@@ -44,5 +47,7 @@ public:
         return m_programs_map[programName];
     }
 };
+
+CUDART_NAMESPACE_END
 
 #endif
