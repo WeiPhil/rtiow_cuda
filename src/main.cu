@@ -12,12 +12,17 @@
 #include "common/macros.h"
 #include "common/variant.h"
 
+#include "base/bsdf/bsdf.h"
+#include "base/bsdf/dielectric.h"
+#include "base/bsdf/diffuse.h"
 #include "base/camera.h"
 #include "base/hittable.h"
 #include "base/ray.h"
 #include "base/scene.h"
 #include "base/sphere.h"
 #include "base/vector.h"
+
+#include "common/variant.h"
 
 using namespace cudart;
 
@@ -99,19 +104,23 @@ void save_image(float *fb, int im_width, int im_height)
 
 int main()
 {
-    static_assert(index_of_impl<int, int, double>::value == 0, "!");
-    static_assert(index_of_impl<double, int, double>::value == 1, "!");
+    static_assert(index_of<int, int>::value == 1, "!");
+    static_assert(index_of<double, int, double>::value == 2, "!");
 
-    static_assert(index_of<int, int, double> == 0, "!");
-    static_assert(index_of<double, int, double> == 1, "!");
+    // static_assert(index_of<int, int, double> == 1, "!");
+    // static_assert(index_of<double, int, double> == 2, "!");
 
-    static_assert(type_at_impl<1, int, float>::type(1.f) == 1.f, "!");
-    static_assert(type_at_impl<0, int, double>::type(1) == int(1), "!");
+    static_assert(type_at_impl<2, int, float>::type(1.f) == 1.f, "!");
+    static_assert(type_at_impl<1, int, double>::type(1) == int(1), "!");
 
-    Mat1 t1;
-    Mat2 t2;
+    Diffuse diffuse;
+    Dielectric t2;
 
-    // Variant<Mat1, Mat2> var = Variant<Mat1, Mat2>(t1);
+    Bsdf bsdf = Bsdf(diffuse);
+
+    float a = bsdf.sample(2.0, 4, 2.0);
+
+    // printf("a %f", a);
 
     int im_width = 1920;
     int im_height = 1080;

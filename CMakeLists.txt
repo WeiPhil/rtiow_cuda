@@ -46,6 +46,7 @@ set(SRC_DIR src)
 set(INCLUDE_DIR include)
 aux_source_directory(${SRC_DIR} SRC_FILES)
 aux_source_directory(${SRC_DIR}/base SRC_FILES_BASE)
+aux_source_directory(${SRC_DIR}/base/bsdf SRC_FILES_BASE)
 aux_source_directory(${SRC_DIR}/opengl SRC_FILES_OPENGL)
 
 # Include path for the project 
